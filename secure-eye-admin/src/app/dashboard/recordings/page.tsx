@@ -1,5 +1,8 @@
-import React, { useState } from 'react'
-import { createPortal } from 'react-dom'
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface RecordingData {
   id: string
@@ -18,70 +21,7 @@ const mockRecordings: RecordingData[] = [
   { id: 'REC0004', cameraId: 'CAM0001', cameraName: 'Front Door Camera', date: '2023-05-21', duration: '00:15:00', threatDetected: true, videoUrl: '/placeholder.mp4' },
 ]
 
-const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default' | 'outline' }> = ({ 
-  children, 
-  className = '', 
-  variant = 'default', 
-  ...props 
-}) => {
-  const baseStyle = 'px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2'
-  const variantStyles = {
-    default: 'bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500',
-    outline: 'bg-transparent border border-gray-300 text-gray-300 hover:bg-gray-700 focus:ring-blue-500',
-  }
-  
-  return (
-    <button 
-      className={`${baseStyle} ${variantStyles[variant]} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-
-const Badge: React.FC<{ children: React.ReactNode; variant: 'threat' | 'safe' }> = ({ children, variant }) => {
-  const baseStyle = 'px-2 py-1 rounded-full text-xs font-semibold'
-  const variantStyles = {
-    threat: 'bg-red-500 text-white',
-    safe: 'bg-green-500 text-white'
-  }
-  
-  return (
-    <span className={`${baseStyle} ${variantStyles[variant]}`}>
-      {children}
-    </span>
-  )
-}
-
-const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => {
-  return (
-    <input
-      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      {...props}
-    />
-  )
-}
-
-const Modal: React.FC<{ isOpen: boolean; onClose: () => void; children: React.ReactNode }> = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null
-
-  return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-gray-800 rounded-lg p-6 max-w-3xl w-full">
-        <div className="flex justify-end">
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            &times;
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>,
-    document.body
-  )
-}
-
-export default function RecordingsComponent() {
+export default function RecordingsPage() {
   const [recordings, setRecordings] = useState<RecordingData[]>(mockRecordings)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRecording, setSelectedRecording] = useState<RecordingData | null>(null)
@@ -100,7 +40,7 @@ export default function RecordingsComponent() {
             type="text"
             placeholder="Search recordings..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e:any) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
@@ -127,13 +67,13 @@ export default function RecordingsComponent() {
                   <td className="px-6 py-4 whitespace-nowrap">{recording.duration}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {recording.threatDetected ? (
-                      <Badge variant="threat">Threat Detected</Badge>
+                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white">Threat Detected</span>
                     ) : (
-                      <Badge variant="safe">No Threat</Badge>
+                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">No Threat</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <Button variant="outline" onClick={() => setSelectedRecording(recording)}>
+                    <Button variant="outline" onClick={() => setSelectedRecording(recording)} className='bg-gray-900'>
                       Show Recording
                     </Button>
                   </td>
@@ -144,9 +84,9 @@ export default function RecordingsComponent() {
         </div>
       </div>
 
-      <Modal isOpen={!!selectedRecording} onClose={() => setSelectedRecording(null)}>
-        {selectedRecording && (
-          <div>
+      {selectedRecording && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-3xl w-full">
             <h2 className="text-xl font-bold mb-4">Recording: {selectedRecording.id}</h2>
             <div className="aspect-w-16 aspect-h-9 mb-4">
               <video controls className="w-full h-full rounded-lg">
@@ -171,21 +111,21 @@ export default function RecordingsComponent() {
                 <span className="font-medium text-gray-400">Threat Detected:</span>
                 <span className="ml-2">
                   {selectedRecording.threatDetected ? (
-                    <Badge variant="threat">Yes</Badge>
+                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-red-500 text-white">Yes</span>
                   ) : (
-                    <Badge variant="safe">No</Badge>
+                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-500 text-white">No</span>
                   )}
                 </span>
               </div>
             </div>
             <div className="flex justify-end">
-              <Button onClick={() => setSelectedRecording(null)}>
+              <Button onClick={() => setSelectedRecording(null)} >
                 Close
               </Button>
             </div>
           </div>
-        )}
-      </Modal>
+        </div>
+      )}
     </div>
   )
 }
