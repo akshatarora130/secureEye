@@ -1,0 +1,21 @@
+{
+  "name": "nit-k-hackathon",
+  "version": "1.0.0",
+  "description": "NIT Kurukshetra Hackathon 2024",
+  "main": "index.js",
+  "scripts": {
+    "AdminUI": "cd secure-eye-admin && npm install && npm run dev",
+    "SecureEye": "cd secure-eye-ui && npm install && npm run dev",
+    "Backend": "cd secure-eye-Backend && npm install && tsc -b && node dist/index.js",
+    "start": "concurrently \"npm run AdminUI\" \"npm run SecureEye\" \"npm run Backend\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prisma:migrate": "cd secure-eye-Database && npx prisma migrate dev",
+    "prisma:studio": "cd secure-eye-Database && npx prisma studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
