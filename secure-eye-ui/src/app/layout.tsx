@@ -6,8 +6,8 @@ import Provider from "./provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Deployer App",
-  description: "You can deploy your react app here",
+  title: "Secure Eye",
+  description: "",
 };
 
 export default function RootLayout({
