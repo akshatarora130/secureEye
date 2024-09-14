@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MapPin,
   Menu,
@@ -35,7 +35,6 @@ import { Progress } from "../../../components/ui/progress";
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const formattedTime = new Date().toLocaleTimeString('en-US', { hour12: true });
 
   return (
     <div className="flex h-screen bg-gray-950 text-gray-100">
@@ -275,8 +274,9 @@ export default function Dashboard() {
                           Camera ID: CAM{String(i).padStart(4, "0")}
                         </p>
                         <p className="text-xs text-gray-400">
-  Registered on {new Intl.DateTimeFormat('en-GB').format(new Date())}
-</p>
+                          Registered on{" "}
+                          {new Intl.DateTimeFormat("en-GB").format(new Date())}
+                        </p>
                       </div>
                       <Button
                         size="sm"
@@ -311,8 +311,8 @@ export default function Dashboard() {
                           Alert: Motion Detected
                         </p>
                         <p className="text-xs text-gray-400">
-  Camera ID: CAM{String(i).padStart(4, "0")} - {formattedTime}
-</p>
+                          Camera ID: CAM{String(i).padStart(4, "0")} 
+                        </p>
                       </div>
                       <Button
                         size="sm"
