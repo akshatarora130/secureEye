@@ -16,6 +16,9 @@ import {
 import { MapPin, Camera, User, Settings } from "lucide-react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const totalSteps = 4;
 
@@ -80,6 +83,9 @@ const reversedTheme = createTheme({
 export default function OnboardingForm() {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [errors, setErrors] = useState<any>({});
+  const BACKEND_URL = "http://localhost:4000";
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -121,16 +127,14 @@ export default function OnboardingForm() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    // Update form data
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
 
-    // Clear the error for the specific field when valid input is entered
     setErrors((prevErrors: any) => ({
       ...prevErrors,
-      [name]: value ? "" : prevErrors[name], // Clear the error if there is valid input
+      [name]: value ? "" : prevErrors[name],
     }));
   };
 
@@ -140,38 +144,39 @@ export default function OnboardingForm() {
   ) => {
     const value = event.target.value;
 
-    // Update form data
     setFormData((prevData) => ({
       ...prevData,
       [key]: value,
     }));
 
-    // Clear the error for the specific field when valid input is entered
     setErrors((prevErrors: any) => ({
       ...prevErrors,
-      [key]: value ? "" : prevErrors[key], // Clear the error if there is valid input
+      [key]: value ? "" : prevErrors[key],
     }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
 
-    // Update form data
     setFormData((prevData) => ({
       ...prevData,
       [name]: checked,
     }));
-
-    // No validation needed for checkbox, so no error clearing is required here
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (validateStep()) {
       if (currentStep < totalSteps - 1) {
         setCurrentStep((prevStep) => prevStep + 1);
       } else {
-        console.log(formData);
-        alert("Form completed successfully!");
+        const response = await axios.post(`${BACKEND_URL}/add/camera`, {
+          data: formData,
+          userId: session?.user.id,
+        });
+        console.log(response);
+        if (response.status === 201) {
+          router.push(`/user-dashboard`);
+        }
       }
     }
   };
@@ -317,20 +322,45 @@ export default function OnboardingForm() {
                         <MenuItem value="Night Vision Camera">
                           Night Vision Camera
                         </MenuItem>
-                        <MenuItem value="IP Camera">IP Camera</MenuItem>
+                        <MenuItem value="360° Panoramic Camera">
+                          360° Panoramic Camera
+                        </MenuItem>
+                        <MenuItem value="Infrared Camera">
+                          Infrared Camera
+                        </MenuItem>
+                        <MenuItem value="Wide-Angle Camera">
+                          Wide-Angle Camera
+                        </MenuItem>
+                        <MenuItem value="Smart Camera">Smart Camera</MenuItem>
+                        <MenuItem value="4K Ultra HD Camera">
+                          4K Ultra HD Camera
+                        </MenuItem>
                       </Select>
                       <Typography color="error">{errors.type}</Typography>
                     </FormControl>
-                    <TextField
-                      label="Camera Range"
-                      name="range"
-                      value={formData.range}
-                      onChange={handleInputChange}
+                    <FormControl
                       fullWidth
                       variant="outlined"
                       error={!!errors.range}
-                      helperText={errors.range}
-                    />
+                    >
+                      <InputLabel id="Camera Range">Camera Range</InputLabel>
+                      <Select
+                        labelId="camera-range-label"
+                        name="type"
+                        value={formData.range}
+                        onChange={(event) => handleSelectChange(event, "range")}
+                        label="Camera Range"
+                      >
+                        <MenuItem value="10-20 meter">10-20 Meter</MenuItem>
+                        <MenuItem value="20-30 meter">20-30 Meter</MenuItem>
+                        <MenuItem value="30-40 meter">30-40 Meter</MenuItem>
+                        <MenuItem value="40-50 meter">40-50 Meter</MenuItem>
+                        <MenuItem value="Above 50 meter">
+                          Above 50 Meter
+                        </MenuItem>
+                      </Select>
+                      <Typography color="error">{errors.range}</Typography>
+                    </FormControl>
                   </div>
                 )}
                 {currentStep === 2 && (
@@ -348,34 +378,28 @@ export default function OnboardingForm() {
                       error={!!errors.location}
                       helperText={errors.location}
                     />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={formData.sharing}
-                          onChange={handleCheckboxChange}
-                          name="sharing"
-                        />
-                      }
-                      label="Allow sharing with other agencies"
-                    />
                   </div>
                 )}
                 {currentStep === 3 && (
-                  <div className="text-center">
+                  <div className="space-y-6">
                     <h3 className="text-xl font-semibold text-black mb-4">
-                      Final Step
+                      Settings
                     </h3>
-                    <p className="text-black mb-4">
-                      Please review all the details before submitting the form.
-                    </p>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      onClick={handleContinue}
-                    >
-                      Submit
-                    </Button>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="sharing"
+                          checked={formData.sharing}
+                          onChange={handleCheckboxChange}
+                        />
+                      }
+                      label="Allow sharing "
+                    />
+                    <Typography variant="body2" color="textSecondary">
+                      Note: Enabling this option will allow your camera
+                      recordings to be visible to the authorities. Please ensure
+                      you are comfortable with this before proceeding.
+                    </Typography>
                   </div>
                 )}
               </motion.div>
