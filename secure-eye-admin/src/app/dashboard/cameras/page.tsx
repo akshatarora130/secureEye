@@ -1,5 +1,8 @@
-import React, { useState } from 'react'
-import { createPortal } from 'react-dom'
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface CameraData {
   id: string
@@ -17,71 +20,7 @@ const mockCameras: CameraData[] = [
   { id: 'CAM0004', name: 'Side Entrance Camera', location: '101 Pine St', status: 'approved', addedBy: 'user4@example.com', dateAdded: '2023-05-18' },
 ]
 
-const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default' | 'outline' | 'destructive' }> = ({ 
-  children, 
-  className = '', 
-  variant = 'default', 
-  ...props 
-}) => {
-  const baseStyle = 'px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2'
-  const variantStyles = {
-    default: 'bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-500',
-    outline: 'bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
-    destructive: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500'
-  }
-  
-  return (
-    <button 
-      className={`${baseStyle} ${variantStyles[variant]} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
-
-const Badge: React.FC<{ children: React.ReactNode; variant: 'approved' | 'pending' }> = ({ children, variant }) => {
-  const baseStyle = 'px-2 py-1 rounded-full text-xs font-semibold'
-  const variantStyles = {
-    approved: 'bg-green-500 text-white',
-    pending: 'bg-yellow-500 text-white'
-  }
-  
-  return (
-    <span className={`${baseStyle} ${variantStyles[variant]}`}>
-      {children}
-    </span>
-  )
-}
-
-const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => {
-  return (
-    <input
-      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      {...props}
-    />
-  )
-}
-
-const Modal: React.FC<{ isOpen: boolean; onClose: () => void; children: React.ReactNode }> = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null
-
-  return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
-        <div className="flex justify-end">
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            &times;
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>,
-    document.body
-  )
-}
-
-export default function CamerasComponent() {
+export default function CamerasPage() {
   const [cameras, setCameras] = useState<CameraData[]>(mockCameras)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCamera, setSelectedCamera] = useState<CameraData | null>(null)
@@ -144,12 +83,14 @@ export default function CamerasComponent() {
                   <td className="px-6 py-4 whitespace-nowrap">{camera.addedBy}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{camera.dateAdded}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <Badge variant={camera.status === 'approved' ? 'approved' : 'pending'}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      camera.status === 'approved' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-white'
+                    }`}>
                       {camera.status}
-                    </Badge>
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <Button variant="outline" onClick={() => setSelectedCamera(camera)}>
+                    <Button variant="outline" onClick={() => setSelectedCamera(camera)} className='bg-gray-900'>
                       Details
                     </Button>
                   </td>
@@ -159,9 +100,9 @@ export default function CamerasComponent() {
           </table>
         </div>
       </div>
-      <Modal isOpen={!!selectedCamera} onClose={() => setSelectedCamera(null)}>
-        {selectedCamera && (
-          <div>
+      {selectedCamera && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-bold mb-4">Camera Details: {selectedCamera.id}</h2>
             <div className="grid gap-4">
               <div>
@@ -183,9 +124,11 @@ export default function CamerasComponent() {
               <div>
                 <span className="font-medium text-gray-400">Status:</span>
                 <span className="ml-2">
-                  <Badge variant={selectedCamera.status === 'approved' ? 'approved' : 'pending'}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                    selectedCamera.status === 'approved' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-white'
+                  }`}>
                     {selectedCamera.status}
-                  </Badge>
+                  </span>
                 </span>
               </div>
             </div>
@@ -199,9 +142,10 @@ export default function CamerasComponent() {
                 </Button>
               </div>
             )}
+            <Button className="mt-4" onClick={() => setSelectedCamera(null)}>Close</Button>
           </div>
-        )}
-      </Modal>
+        </div>
+      )}
     </div>
   )
 }
