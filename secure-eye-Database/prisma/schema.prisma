@@ -30,16 +30,18 @@ model Account {
 model camera {
   id          String  @id @default(cuid())
   name        String
-  number      Int
+  number      String
   companyName String
   type        String
   model       String
   serialNo    String
   range       String
-  location    String
+  latitude    Float 
+  longitude   Float 
   sharing     Boolean
   user        User    @relation(fields: [userId], references: [id])
   userId      String
+  isVerified  Boolean @default(false)
 }
 
 model Session {
@@ -67,4 +69,12 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  passkey   String   @unique
+  createdAt DateTime @default(now())
 }
