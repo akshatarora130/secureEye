@@ -79,6 +79,7 @@ const reversedTheme = createTheme({
 
 export default function OnboardingForm() {
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [errors, setErrors] = useState<any>({});
 
   const [formData, setFormData] = useState({
     name: "",
@@ -91,6 +92,31 @@ export default function OnboardingForm() {
     location: "",
     sharing: false,
   });
+
+  const validateStep = () => {
+    let newErrors: any = {};
+    switch (currentStep) {
+      case 0:
+        if (!formData.name) newErrors.name = "Name is required";
+        if (!formData.number) newErrors.number = "Contact number is required";
+        break;
+      case 1:
+        if (!formData.company) newErrors.company = "Camera company is required";
+        if (!formData.model) newErrors.model = "Camera model is required";
+        if (!formData.serialNo)
+          newErrors.serialNo = "Serial number is required";
+        if (!formData.type) newErrors.type = "Camera type is required";
+        if (!formData.range) newErrors.range = "Camera range is required";
+        break;
+      case 2:
+        if (!formData.location) newErrors.location = "Location is required";
+        break;
+      default:
+        break;
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -119,11 +145,13 @@ export default function OnboardingForm() {
   };
 
   const handleContinue = () => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep((prevStep) => prevStep + 1);
-    } else {
-      console.log(formData);
-      alert("Form completed successfully!");
+    if (validateStep()) {
+      if (currentStep < totalSteps - 1) {
+        setCurrentStep((prevStep) => prevStep + 1);
+      } else {
+        console.log(formData);
+        alert("Form completed successfully!");
+      }
     }
   };
 
@@ -198,6 +226,8 @@ export default function OnboardingForm() {
                       onChange={handleInputChange}
                       fullWidth
                       variant="outlined"
+                      error={!!errors.name}
+                      helperText={errors.name}
                     />
                     <TextField
                       label="Contact Number"
@@ -207,6 +237,8 @@ export default function OnboardingForm() {
                       fullWidth
                       variant="outlined"
                       type="tel"
+                      error={!!errors.number}
+                      helperText={errors.number}
                     />
                   </div>
                 )}
@@ -222,6 +254,8 @@ export default function OnboardingForm() {
                       onChange={handleInputChange}
                       fullWidth
                       variant="outlined"
+                      error={!!errors.company}
+                      helperText={errors.company}
                     />
                     <TextField
                       label="Camera Model"
@@ -230,6 +264,8 @@ export default function OnboardingForm() {
                       onChange={handleInputChange}
                       fullWidth
                       variant="outlined"
+                      error={!!errors.model}
+                      helperText={errors.model}
                     />
                     <TextField
                       label="Serial Number"
@@ -238,8 +274,14 @@ export default function OnboardingForm() {
                       onChange={handleInputChange}
                       fullWidth
                       variant="outlined"
+                      error={!!errors.serialNo}
+                      helperText={errors.serialNo}
                     />
-                    <FormControl fullWidth variant="outlined">
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      error={!!errors.type}
+                    >
                       <InputLabel id="camera-type-label">
                         Camera Type
                       </InputLabel>
@@ -254,45 +296,26 @@ export default function OnboardingForm() {
                         <MenuItem value="Night Vision Camera">
                           Night Vision Camera
                         </MenuItem>
-                        <MenuItem value="360° Panoramic Camera">
-                          360° Panoramic Camera
-                        </MenuItem>
-                        <MenuItem value="Infrared Camera">
-                          Infrared Camera
-                        </MenuItem>
-                        <MenuItem value="Wide-Angle Camera">
-                          Wide-Angle Camera
-                        </MenuItem>
-                        <MenuItem value="Smart Camera">Smart Camera</MenuItem>
-                        <MenuItem value="4K Ultra HD Camera">
-                          4K Ultra HD Camera
-                        </MenuItem>
+                        <MenuItem value="IP Camera">IP Camera</MenuItem>
                       </Select>
+                      <Typography color="error">{errors.type}</Typography>
                     </FormControl>
-                    <FormControl fullWidth variant="outlined">
-                      <InputLabel id="camera-range-label">
-                        Camera Range
-                      </InputLabel>
-                      <Select
-                        labelId="camera-range-label"
-                        name="range"
-                        value={formData.range}
-                        onChange={(event) => handleSelectChange(event, "range")}
-                        label="Camera Range"
-                      >
-                        <MenuItem value="10-20 meters">10-20 meters</MenuItem>
-                        <MenuItem value="20-30 meters">20-30 meters</MenuItem>
-                        <MenuItem value="30-40 meters">30-40 meters</MenuItem>
-                        <MenuItem value="40-50 meters">40-50 meters</MenuItem>
-                        <MenuItem value="above 50">Above 50 meters</MenuItem>
-                      </Select>
-                    </FormControl>
+                    <TextField
+                      label="Camera Range"
+                      name="range"
+                      value={formData.range}
+                      onChange={handleInputChange}
+                      fullWidth
+                      variant="outlined"
+                      error={!!errors.range}
+                      helperText={errors.range}
+                    />
                   </div>
                 )}
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-semibold text-black mb-4">
-                      Set Location
+                      Location and Sharing
                     </h3>
                     <TextField
                       label="Location"
@@ -301,46 +324,60 @@ export default function OnboardingForm() {
                       onChange={handleInputChange}
                       fullWidth
                       variant="outlined"
+                      error={!!errors.location}
+                      helperText={errors.location}
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={formData.sharing}
+                          onChange={handleCheckboxChange}
+                          name="sharing"
+                        />
+                      }
+                      label="Allow sharing with other agencies"
                     />
                   </div>
                 )}
                 {currentStep === 3 && (
-                  <div className="space-y-6">
+                  <div className="text-center">
                     <h3 className="text-xl font-semibold text-black mb-4">
-                      Settings
+                      Final Step
                     </h3>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          name="sharing"
-                          checked={formData.sharing}
-                          onChange={handleCheckboxChange}
-                        />
-                      }
-                      label="Allow sharing "
-                    />
-                    <Typography variant="body2" color="textSecondary">
-                      Note: Enabling this option will allow your camera
-                      recordings to be visible to the authorities. Please ensure
-                      you are comfortable with this before proceeding.
-                    </Typography>
+                    <p className="text-black mb-4">
+                      Please review all the details before submitting the form.
+                    </p>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      onClick={handleContinue}
+                    >
+                      Submit
+                    </Button>
                   </div>
                 )}
               </motion.div>
             </AnimatePresence>
+          </div>
 
-            <div className="flex justify-between mt-8">
-              <Button
-                onClick={handleBack}
-                variant="outlined"
-                className="text-black border-black hover:bg-[#333333] hover:text-white"
-              >
-                Back
-              </Button>
-              <Button onClick={handleContinue} variant="contained">
-                {currentStep === totalSteps - 1 ? "Finish" : "Continue"}
-              </Button>
-            </div>
+          <div className="flex justify-between p-6">
+            <Button
+              onClick={handleBack}
+              disabled={currentStep === 0}
+              variant="outlined"
+              color="primary"
+            >
+              Back
+            </Button>
+            <Button
+              onClick={handleContinue}
+              disabled={Object.keys(errors).length > 0}
+              variant="contained"
+              color="primary"
+            >
+              {currentStep === totalSteps - 1 ? "Finish" : "Continue"}
+            </Button>
           </div>
         </motion.div>
       </div>
