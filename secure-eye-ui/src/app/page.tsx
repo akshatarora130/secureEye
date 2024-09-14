@@ -30,6 +30,9 @@ export default function Home() {
               <Button
                 variant="outline"
                 className="rounded-full hover:bg-slate-600 hover:text-white transition-colors"
+                onClick={() => {
+                  router.push("/user-dashboard");
+                }}
               >
                 Dashboard
               </Button>
