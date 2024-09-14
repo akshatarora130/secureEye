@@ -26,13 +26,14 @@ app.post("/add/camera", async (req, res) => {
     const camera = await prisma.camera.create({
       data: {
         name: data.name,
-        number: parseInt(data.number),
+        number: data.number,
         companyName: data.company,
         type: data.type,
         model: data.model,
         serialNo: data.serialNo,
         range: data.range,
-        location: data.location,
+        latitude: data.latitude,
+        longitude: data.longitude,
         sharing: data.sharing,
         user: {
           connect: { id: userId },
@@ -55,13 +56,14 @@ app.post("/edit/camera", async (req, res) => {
       where: { id },
       data: {
         name: data.name,
-        number: parseInt(data.number),
+        number: data.number,
         companyName: data.company,
         type: data.type,
         model: data.model,
         serialNo: data.serialNo,
         range: data.range,
-        location: data.location,
+        latitude: data.latitude,
+        longitude: data.longitude,
         sharing: data.sharing,
         user: {
           connect: { id: data.userId },
@@ -107,7 +109,11 @@ app.post("/admin/generatePasskey", async (req, res) => {
     }
 
     // Generate a random alphanumeric passkey
-    const passkey = crypto.randomBytes(3).toString("hex").toUpperCase().slice(0, 6);
+    const passkey = crypto
+      .randomBytes(3)
+      .toString("hex")
+      .toUpperCase()
+      .slice(0, 6);
 
     // Create admin with the generated passkey
     const newAdmin = await prisma.admin.create({
@@ -121,8 +127,10 @@ app.post("/admin/generatePasskey", async (req, res) => {
     // Return the created admin with the passkey
     res.status(201).json({ admin: newAdmin, passkey });
   } catch (error) {
-    console.error("Error generating passkey:", error);  // More detailed error logging
-    res.status(500).json({ message: "Failed to generate passkey", error: error });  // Send detailed error
+    console.error("Error generating passkey:", error); // More detailed error logging
+    res
+      .status(500)
+      .json({ message: "Failed to generate passkey", error: error }); // Send detailed error
   }
 });
 
@@ -151,7 +159,7 @@ app.post("/camera/verify", async (req, res) => {
   try {
     const { id } = req.body;
 
-    if(!id) {
+    if (!id) {
       return res.status(400).json({ message: "Camera ID is required" });
     }
 

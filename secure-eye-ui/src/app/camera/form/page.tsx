@@ -13,12 +13,15 @@ import {
   SelectChangeEvent,
   Typography,
 } from "@mui/material";
+import "leaflet/dist/leaflet.css";
 import { MapPin, Camera, User, Settings } from "lucide-react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
 
 const totalSteps = 4;
 
@@ -95,9 +98,18 @@ export default function OnboardingForm() {
     serialNo: "",
     type: "",
     range: "",
-    location: "",
+    latitude: 30.002516938570686,
+    longitude: 76.83837890625001,
     sharing: false,
   });
+
+  const handleSetCoordinates = (lat: number, lng: number) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      latitude: lat,
+      longitude: lng,
+    }));
+  };
 
   const validateStep = () => {
     let newErrors: any = {};
@@ -114,9 +126,9 @@ export default function OnboardingForm() {
         if (!formData.type) newErrors.type = "Camera type is required";
         if (!formData.range) newErrors.range = "Camera range is required";
         break;
-      case 2:
-        if (!formData.location) newErrors.location = "Location is required";
-        break;
+      // case 2:
+      //   if (!formData.location) newErrors.location = "Location is required";
+      //   break;
       default:
         break;
     }
@@ -177,6 +189,7 @@ export default function OnboardingForm() {
         if (response.status === 201) {
           router.push(`/user-dashboard`);
         }
+        console.log(formData);
       }
     }
   };
@@ -197,6 +210,27 @@ export default function OnboardingForm() {
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
     transition: { duration: 0.3 },
+  };
+
+  const MapComponent = ({
+    setCoordinates,
+  }: {
+    setCoordinates: (lat: number, lng: number) => void;
+  }) => {
+    const [position, setPosition] = useState<L.LatLng | null>(null);
+
+    useMapEvents({
+      click(e: any) {
+        setPosition(e.latlng);
+        setCoordinates(e.latlng.lat, e.latlng.lng);
+      },
+    });
+
+    return position === null ? null : (
+      <Marker position={position}>
+        {/* You can customize the marker or leave it default */}
+      </Marker>
+    );
   };
 
   return (
@@ -368,16 +402,23 @@ export default function OnboardingForm() {
                     <h3 className="text-xl font-semibold text-black mb-4">
                       Location and Sharing
                     </h3>
-                    <TextField
-                      label="Location"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      fullWidth
-                      variant="outlined"
-                      error={!!errors.location}
-                      helperText={errors.location}
-                    />
+
+                    <MapContainer
+                      center={[30.002516938570686, 76.83837890625001]}
+                      zoom={13}
+                      style={{ height: "400px", width: "100%" }}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      <MapComponent setCoordinates={handleSetCoordinates} />
+                    </MapContainer>
+
+                    <p>
+                      Selected Latitude: {formData.latitude}, Longitude:{" "}
+                      {formData.longitude}
+                    </p>
                   </div>
                 )}
                 {currentStep === 3 && (
