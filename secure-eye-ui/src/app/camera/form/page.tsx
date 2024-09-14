@@ -120,17 +120,17 @@ export default function OnboardingForm() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    // Update form data
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-  };
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: checked,
+    // Clear the error for the specific field when valid input is entered
+    setErrors((prevErrors: any) => ({
+      ...prevErrors,
+      [name]: value ? "" : prevErrors[name], // Clear the error if there is valid input
     }));
   };
 
@@ -138,10 +138,31 @@ export default function OnboardingForm() {
     event: SelectChangeEvent<string>,
     key: string
   ) => {
+    const value = event.target.value;
+
+    // Update form data
     setFormData((prevData) => ({
       ...prevData,
-      [key]: event.target.value,
+      [key]: value,
     }));
+
+    // Clear the error for the specific field when valid input is entered
+    setErrors((prevErrors: any) => ({
+      ...prevErrors,
+      [key]: value ? "" : prevErrors[key], // Clear the error if there is valid input
+    }));
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+
+    // Update form data
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: checked,
+    }));
+
+    // No validation needed for checkbox, so no error clearing is required here
   };
 
   const handleContinue = () => {
@@ -372,7 +393,6 @@ export default function OnboardingForm() {
             </Button>
             <Button
               onClick={handleContinue}
-              disabled={Object.keys(errors).length > 0}
               variant="contained"
               color="primary"
             >
