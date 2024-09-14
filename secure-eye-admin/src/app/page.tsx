@@ -3,8 +3,5 @@
 import Dashboard from "./dashboard/page";
 
 export default function Home() {
-  return (
-    <div>Admin</div>
-    <Dashboard />
-  );
+  return <div>Admin</div>;
 }
