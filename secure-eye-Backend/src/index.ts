@@ -78,6 +78,25 @@ app.post("/edit/camera", async (req, res) => {
   }
 });
 
+app.delete("/delete/camera", async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if(!id) {
+      return res.status(400).json({ message: "Camera ID is required" });
+    }
+
+    await prisma.camera.delete({
+      where: { id },
+    });
+
+    res.status(200).json({ message: "Camera deleted" });
+  } catch (err) { 
+    console.error(err);
+    res.status(500).json({ message: "Error deleting camera" });
+  }
+});
+
 app.get("/all/camera", async (req, res) => {
   const { userId } = req.body;
   try {

@@ -81,14 +81,10 @@ export default function UserDashboard() {
 
   const [selectedCamera, setSelectedCamera] = useState(null);
 
-  const handleUpdateCamera = (updatedCamera) => {
-    setCameras(
-      cameras.map((camera) =>
-        camera.id === updatedCamera.id ? updatedCamera : camera
-      )
-    );
-    setSelectedCamera(null);
-  };
+  const handleUpdateCamera = (updatedCamera: any) => {
+    setCameras(cameras.map(camera => camera.id === updatedCamera.id ? updatedCamera : camera))
+    setSelectedCamera(null)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 p-8">
