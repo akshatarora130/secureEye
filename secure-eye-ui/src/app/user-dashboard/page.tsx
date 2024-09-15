@@ -37,7 +37,7 @@ export default function UserDashboard() {
 
   const [selectedCamera, setSelectedCamera] = useState(null)
 
-  const handleUpdateCamera = (updatedCamera) => {
+  const handleUpdateCamera = (updatedCamera: any) => {
     setCameras(cameras.map(camera => camera.id === updatedCamera.id ? updatedCamera : camera))
     setSelectedCamera(null)
   }
