@@ -22,6 +22,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const totalSteps = 4;
 
@@ -242,7 +243,7 @@ export default function OnboardingForm() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
           style={{
-            boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)", // Glowing white border
+            boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)",
           }}
         >
           <div className="bg-black text-white p-6">

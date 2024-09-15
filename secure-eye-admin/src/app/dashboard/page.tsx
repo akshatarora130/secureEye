@@ -26,9 +26,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { useRouter } from "next/navigation";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+const MapComponent = ({
+  setCoordinates,
+}: {
+  setCoordinates: (lat: number, lng: number) => void;
+}) => {
+  const [position, setPosition] = useState<L.LatLng | null>(null);
+
+  useMapEvents({
+    click(e: any) {
+      setPosition(e.latlng);
+      setCoordinates(e.latlng.lat, e.latlng.lng);
+    },
+  });
+
+  return position === null ? null : (
+    <Marker position={position}>
+      {/* You can customize the marker or leave it default */}
+    </Marker>
+  );
+};
 
 export default function Dashboard() {
   const router = useRouter();
+  const handleSetCoordinates = (lat: number, lng: number) => {};
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-gray-100">
       {/* Navbar */}
@@ -215,14 +240,18 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="aspect-video bg-gray-800 rounded-md flex items-center justify-center relative overflow-hidden group">
-              <div className="absolute inset-0 bg-indigo-500 bg-opacity-10 group-hover:bg-opacity-20 transition-all duration-300"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Camera className="w-16 h-16 text-indigo-500 animate-pulse group-hover:scale-110 transition-all duration-300" />
-              </div>
-              <p className="text-gray-400 z-10 group-hover:text-indigo-100 transition-colors duration-300">
-                Interactive Map Component
-              </p>
+            <div className="relative w-full h-[600px]">
+              <MapContainer
+                center={[30.002516938570686, 76.83837890625001]}
+                zoom={13}
+                style={{ height: "100%", width: "100%" }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <MapComponent setCoordinates={handleSetCoordinates} />
+              </MapContainer>
             </div>
           </CardContent>
         </Card>
