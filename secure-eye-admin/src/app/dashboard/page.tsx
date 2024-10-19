@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import Link from "next/link";
+import dynamic from 'next/dynamic';
 import {
   Camera,
   Bell,
@@ -26,38 +27,32 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { useRouter } from "next/navigation";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
-const MapComponent = ({
-  setCoordinates,
-}: {
-  setCoordinates: (lat: number, lng: number) => void;
-}) => {
-  const [position, setPosition] = useState<L.LatLng | null>(null);
+// Dynamically import the Map component with ssr disabled
+const MapWithNoSSR = dynamic(() => import('@/components/ui/map'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[600px] flex items-center justify-center bg-gray-800 rounded-lg">
+      <div className="text-indigo-400">Loading map...</div>
+    </div>
+  ),
+});
 
-  useMapEvents({
-    click(e: any) {
-      setPosition(e.latlng);
-      setCoordinates(e.latlng.lat, e.latlng.lng);
-    },
-  });
-
-  return position === null ? null : (
-    <Marker position={position}>
-      {/* You can customize the marker or leave it default */}
-    </Marker>
-  );
-};
 
 export default function Dashboard() {
   const router = useRouter();
-  const handleSetCoordinates = (lat: number, lng: number) => {};
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+
+  const handleSetCoordinates = (lat: number, lng: number) => {
+    setCoordinates({ lat, lng });
+    console.log('Selected coordinates:', { lat, lng });
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-gray-100">
-      {/* Navbar */}
-      <header className="flex items-center justify-between px-6 py-4 bg-gray-900">
+    
+        {/* Navbar */}
+        <header className="flex items-center justify-between px-6 py-4 bg-gray-900">
         <div className="flex items-center">
           <Camera className="w-8 h-8 mr-2 text-indigo-400" />
           <span className="text-xl font-semibold text-indigo-100">
@@ -139,7 +134,6 @@ export default function Dashboard() {
           </DropdownMenu>
         </div>
       </header>
-
       {/* Main Content Area */}
       <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-950 p-6">
         <h1 className="text-3xl font-semibold mb-6 text-indigo-100">
@@ -231,7 +225,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
-
         {/* Map Section */}
         <Card className="bg-gray-900 border-gray-800 mb-6 hover:border-indigo-500 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 group">
           <CardHeader>
@@ -240,24 +233,14 @@ export default function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="relative w-full h-[600px]">
-              <MapContainer
-                center={[30.002516938570686, 76.83837890625001]}
-                zoom={13}
-                style={{ height: "100%", width: "100%" }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <MapComponent setCoordinates={handleSetCoordinates} />
-              </MapContainer>
+            <div className="relative w-full h-[600px] rounded-lg overflow-hidden">
+              <MapWithNoSSR setCoordinates={handleSetCoordinates} />
             </div>
           </CardContent>
         </Card>
 
-        {/* Recent Registrations and Alerts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Registrations and Alerts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-gray-900 border-gray-800 hover:border-indigo-500 transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/50 group">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-indigo-100 group-hover:text-indigo-300 transition-colors duration-300">

@@ -3,6 +3,17 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Link from "next/link";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { Camera, Bell, Settings, LogOut, Search, ChevronDown, BarChart2, AlertTriangle, FileVideo } from "lucide-react";
 
 interface CameraData {
   id: string
@@ -46,17 +57,84 @@ export default function CamerasPage() {
 
   return (
     <div className="p-6 bg-gray-900 text-white min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Cameras</h1>
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder="Search cameras..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+     
+			<header className='flex items-center justify-between px-6 py-4 bg-gray-900'>
+				<div className='flex items-center'>
+					<Camera className='w-8 h-8 mr-2 text-indigo-400' />
+					<span className='text-xl font-semibold text-indigo-100'>SecureEye Admin</span>
+				</div>
+				<nav className='flex items-center space-x-4'>
+					<Link
+						href='/dashboard'
+						className='text-gray-300 hover:text-indigo-100 transition-colors duration-200'>
+						Dashboard
+					</Link>
+					<Link
+						href='/dashboard/cameras'
+						className='text-gray-300 hover:text-indigo-100 transition-colors duration-200'>
+						Cameras
+					</Link>
+					<Link
+						href='/dashboard/recordings'
+						className='text-gray-300 hover:text-indigo-100 transition-colors duration-200'>
+						Recordings
+					</Link>
+				</nav>
+				<div className='flex items-center'>
+					<div className='relative mr-4'>
+						<Input
+							type='text'
+							placeholder='Search recordings...'
+							value={searchTerm}
+							onChange={(e: any) => setSearchTerm(e.target.value)}
+						/>
+					</div>
+					<Button
+						variant='ghost'
+						size='icon'
+						className='relative text-gray-300 hover:text-indigo-100 transition-colors duration-200 hover:bg-gray-800'>
+						<Bell className='w-5 h-5' />
+						<span className='absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-indigo-100 transform translate-x-1/2 -translate-y-1/2 bg-indigo-600 rounded-full'>
+							3
+						</span>
+					</Button>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant='ghost'
+								size='sm'
+								className='ml-4 flex items-center text-gray-300 hover:text-indigo-100 transition-colors duration-200 hover:bg-gray-800'>
+								<img
+									className='w-8 h-8 rounded-full mr-2'
+									src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRm8aIS6GEFUY2LNsXHyd2c435FciiYgJKC4Q&s'
+									alt='User'
+								/>
+								<span>Pro-Koderz</span>
+								<ChevronDown className='w-4 h-4 ml-2' />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent
+							align='end'
+							className='w-56 bg-gray-800 text-gray-100 border-gray-700'>
+							<DropdownMenuLabel>My Account</DropdownMenuLabel>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem className='hover:bg-gray-700 transition-colors duration-200'>
+								<Settings className='mr-2 h-4 w-4' />
+								<span>Settings</span>
+							</DropdownMenuItem>
+							<DropdownMenuItem className='hover:bg-gray-700 transition-colors duration-200'>
+								<LogOut className='mr-2 h-4 w-4' />
+								<span>Log out</span>
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
+			</header>
+      
+      <div className='flex justify-between items-center m-6'>
+				<h1 className='text-2xl font-bold'>Cameras</h1>
+			</div>
+
       <div className="bg-gray-800 rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-700">
           <h2 className="text-lg font-semibold">All Cameras</h2>
