@@ -57,7 +57,7 @@ export default function AdminLoginComponent() {
             SecureEye Admin
           </h2>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Enter your admin passkey to access the dashboard
+            Enter your admin passkey to access the dashboard 
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -72,7 +72,7 @@ export default function AdminLoginComponent() {
                 type="password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-600 placeholder-gray-400 text-black rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Enter admin passkey"
+                placeholder="Enter admin passkey (admin123)"
                 value={passkey}
                 onChange={(e) => setPasskey(e.target.value)}
               />
