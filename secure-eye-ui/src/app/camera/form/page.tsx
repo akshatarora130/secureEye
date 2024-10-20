@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Checkbox,
@@ -13,16 +13,18 @@ import {
   SelectChangeEvent,
   Typography,
 } from "@mui/material";
-import "leaflet/dist/leaflet.css";
 import { MapPin, Camera, User, Settings } from "lucide-react";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import dynamic from 'next/dynamic';
+import 'leaflet/dist/leaflet.css';
+
+// Dynamic import of MapComponent with SSR disabled
+const MapComponent = dynamic(
+  () => import('./components/MapComponent'),
+  { ssr: false }
+);
 
 const totalSteps = 4;
 
@@ -84,11 +86,17 @@ const reversedTheme = createTheme({
   },
 });
 
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+  transition: { duration: 0.3 },
+};
+
 export default function OnboardingForm() {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [errors, setErrors] = useState<any>({});
-  const BACKEND_URL = "http://localhost:4000";
-  const { data: session } = useSession();
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -104,13 +112,9 @@ export default function OnboardingForm() {
     sharing: false,
   });
 
-  const handleSetCoordinates = (lat: number, lng: number) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      latitude: lat,
-      longitude: lng,
-    }));
-  };
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const validateStep = () => {
     let newErrors: any = {};
@@ -122,14 +126,10 @@ export default function OnboardingForm() {
       case 1:
         if (!formData.company) newErrors.company = "Camera company is required";
         if (!formData.model) newErrors.model = "Camera model is required";
-        if (!formData.serialNo)
-          newErrors.serialNo = "Serial number is required";
+        if (!formData.serialNo) newErrors.serialNo = "Serial number is required";
         if (!formData.type) newErrors.type = "Camera type is required";
         if (!formData.range) newErrors.range = "Camera range is required";
         break;
-      // case 2:
-      //   if (!formData.location) newErrors.location = "Location is required";
-      //   break;
       default:
         break;
     }
@@ -139,29 +139,22 @@ export default function OnboardingForm() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
-
     setErrors((prevErrors: any) => ({
       ...prevErrors,
       [name]: value ? "" : prevErrors[name],
     }));
   };
 
-  const handleSelectChange = (
-    event: SelectChangeEvent<string>,
-    key: string
-  ) => {
+  const handleSelectChange = (event: SelectChangeEvent<string>, key: string) => {
     const value = event.target.value;
-
     setFormData((prevData) => ({
       ...prevData,
       [key]: value,
     }));
-
     setErrors((prevErrors: any) => ({
       ...prevErrors,
       [key]: value ? "" : prevErrors[key],
@@ -170,10 +163,17 @@ export default function OnboardingForm() {
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-
     setFormData((prevData) => ({
       ...prevData,
       [name]: checked,
+    }));
+  };
+
+  const handleSetCoordinates = (lat: number, lng: number) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      latitude: lat,
+      longitude: lng,
     }));
   };
 
@@ -182,15 +182,11 @@ export default function OnboardingForm() {
       if (currentStep < totalSteps - 1) {
         setCurrentStep((prevStep) => prevStep + 1);
       } else {
-        const response = await axios.post(`${BACKEND_URL}/add/camera`, {
-          data: formData,
-          userId: session?.user.id,
-        });
-        console.log(response);
-        if (response.status === 201) {
-          router.push(`/user-dashboard`);
+        try {
+          router.push('/user-dashboard');
+        } catch (error) {
+          console.error('Error submitting form:', error);
         }
-        console.log(formData);
       }
     }
   };
@@ -206,34 +202,6 @@ export default function OnboardingForm() {
     <Settings key="settings" className="w-6 h-6" />,
   ];
 
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
-    transition: { duration: 0.3 },
-  };
-
-  const MapComponent = ({
-    setCoordinates,
-  }: {
-    setCoordinates: (lat: number, lng: number) => void;
-  }) => {
-    const [position, setPosition] = useState<L.LatLng | null>(null);
-
-    useMapEvents({
-      click(e: any) {
-        setPosition(e.latlng);
-        setCoordinates(e.latlng.lat, e.latlng.lng);
-      },
-    });
-
-    return position === null ? null : (
-      <Marker position={position}>
-        {/* You can customize the marker or leave it default */}
-      </Marker>
-    );
-  };
-
   return (
     <ThemeProvider theme={reversedTheme}>
       <div className="flex items-center justify-center min-h-screen bg-black py-10 px-4">
@@ -242,15 +210,12 @@ export default function OnboardingForm() {
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          style={{
-            boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)",
-          }}
+          style={{ boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)" }}
         >
           <div className="bg-black text-white p-6">
-            <h2 className="text-3xl font-bold text-center">
-              Camera Registration
-            </h2>
+            <h2 className="text-3xl font-bold text-center">Camera Registration</h2>
           </div>
+
           <div className="p-8">
             <div className="flex justify-between mb-12">
               {stepIcons.map((icon, index) => (
@@ -303,6 +268,7 @@ export default function OnboardingForm() {
                     />
                   </div>
                 )}
+
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-semibold text-black mb-4">
@@ -343,9 +309,7 @@ export default function OnboardingForm() {
                       variant="outlined"
                       error={!!errors.type}
                     >
-                      <InputLabel id="camera-type-label">
-                        Camera Type
-                      </InputLabel>
+                      <InputLabel id="camera-type-label">Camera Type</InputLabel>
                       <Select
                         labelId="camera-type-label"
                         name="type"
@@ -378,10 +342,10 @@ export default function OnboardingForm() {
                       variant="outlined"
                       error={!!errors.range}
                     >
-                      <InputLabel id="Camera Range">Camera Range</InputLabel>
+                      <InputLabel id="camera-range-label">Camera Range</InputLabel>
                       <Select
                         labelId="camera-range-label"
-                        name="type"
+                        name="range"
                         value={formData.range}
                         onChange={(event) => handleSelectChange(event, "range")}
                         label="Camera Range"
@@ -390,38 +354,29 @@ export default function OnboardingForm() {
                         <MenuItem value="20-30 meter">20-30 Meter</MenuItem>
                         <MenuItem value="30-40 meter">30-40 Meter</MenuItem>
                         <MenuItem value="40-50 meter">40-50 Meter</MenuItem>
-                        <MenuItem value="Above 50 meter">
-                          Above 50 Meter
-                        </MenuItem>
+                        <MenuItem value="Above 50 meter">Above 50 Meter</MenuItem>
                       </Select>
                       <Typography color="error">{errors.range}</Typography>
                     </FormControl>
                   </div>
                 )}
-                {currentStep === 2 && (
+
+                {currentStep === 2 && isClient && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-semibold text-black mb-4">
                       Location and Sharing
                     </h3>
-
-                    <MapContainer
-                      center={[30.002516938570686, 76.83837890625001]}
-                      zoom={13}
-                      style={{ height: "400px", width: "100%" }}
-                    >
-                      <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                      />
-                      <MapComponent setCoordinates={handleSetCoordinates} />
-                    </MapContainer>
-
-                    <p>
-                      Selected Latitude: {formData.latitude}, Longitude:{" "}
-                      {formData.longitude}
+                    <MapComponent
+                      initialPosition={[formData.latitude, formData.longitude]}
+                      onPositionChange={handleSetCoordinates}
+                    />
+                    <p className="mt-2 text-sm text-gray-600">
+                      Selected Latitude: {formData.latitude.toFixed(6)}, Longitude:{" "}
+                      {formData.longitude.toFixed(6)}
                     </p>
                   </div>
                 )}
+
                 {currentStep === 3 && (
                   <div className="space-y-6">
                     <h3 className="text-xl font-semibold text-black mb-4">
@@ -435,12 +390,12 @@ export default function OnboardingForm() {
                           onChange={handleCheckboxChange}
                         />
                       }
-                      label="Allow sharing "
+                      label="Allow sharing"
                     />
                     <Typography variant="body2" color="textSecondary">
-                      Note: Enabling this option will allow your camera
-                      recordings to be visible to the authorities. Please ensure
-                      you are comfortable with this before proceeding.
+                      Note: Enabling this option will allow your camera recordings
+                      to be visible to the authorities. Please ensure you are
+                      comfortable with this before proceeding.
                     </Typography>
                   </div>
                 )}

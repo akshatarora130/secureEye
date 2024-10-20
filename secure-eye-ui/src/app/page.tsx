@@ -1,22 +1,41 @@
-"use client";
+"use client"
 
-import { GlobeDemo } from "../components/myglobe";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import div2 from "../../public/div2.png";
-import { CardHoverEffectDemo } from "@/components/myhovereffect";
-import { TracingBeam } from "../../components/ui/tracing-beam";
-import { AnimatedTooltipPreview } from "@/components/tooltip";
-import { Suspense } from "react";
-import Link from "next/link";
-import { Camera, Lock, Zap, DollarSign, Shield, FileCheck } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { GlobeDemo } from "../components/myglobe"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import div2 from "../../public/div2.png"
+import { CardHoverEffectDemo } from "@/components/myhovereffect"
+import { TracingBeam } from "../../components/ui/tracing-beam"
+import { AnimatedTooltipPreview } from "@/components/tooltip"
+import { Suspense } from "react"
+import Link from "next/link"
+import { Camera, Lock, Zap, DollarSign, Shield, FileCheck } from "lucide-react"
+import { useRouter } from "next/navigation"
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useAuth,
+  useSignIn
+} from '@clerk/nextjs'
 
 export default function Home() {
-  const router = useRouter();
-  const { data: session } = useSession();
+  const router = useRouter()
+  const { isSignedIn } = useAuth()
+  //const { signIn, isLoaded } = useSignIn(); // Removed as handleAddCamera is removed
+
+  // Removed handleAddCamera function
+  //const handleAddCamera = () => {
+  //  if (isSignedIn) {
+  //    router.push("/camera/form")
+  //  } else {
+  //    // Redirect to sign-in page
+  //    router.push("/sign-in")
+  //  }
+  //}
+
   return (
     <div className="min-h-screen bg-black text-white">
       <TracingBeam className="overflow-hidden">
@@ -25,57 +44,46 @@ export default function Home() {
             <h1 className="text-2xl font-bold ml-8">SecureEye</h1>
           </div>
 
-          {session ? (
-            <div className="flex justify-center lg:justify-end items-center space-x-4">
+          <div className="flex justify-center lg:justify-end items-center space-x-4">
+            <SignedIn>
               <Button
                 variant="outline"
                 className="rounded-full hover:bg-slate-600 hover:text-white transition-colors"
                 onClick={() => {
-                  router.push("/user-dashboard");
+                  router.push("/user-dashboard")
                 }}
               >
                 Dashboard
               </Button>
-              <Link href="/camera/form">
+              <Button
+                variant="outline"
+                className="rounded-full hover:bg-slate-600 hover:text-white transition-colors"
+                onClick={() => router.push("/camera/form")}
+              >
+                Add Camera
+              </Button>
+              <UserButton />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton>
                 <Button
                   variant="outline"
                   className="rounded-full hover:bg-slate-600 hover:text-white transition-colors"
                 >
-                  Add Camera
+                  Sign In to Add Camera
                 </Button>
-              </Link>
-              <Button
-                variant="default"
-                className="rounded-3xl bg-gray-600 hover:bg-white hover:text-black transition-colors"
-                onClick={() => {
-                  signOut();
-                }}
-              >
-                Logout
-              </Button>
-            </div>
-          ) : (
-            <div className="flex justify-center items-center space-x-4">
-              <Button
-                variant="default"
-                className="rounded-3xl bg-gray-600 hover:bg-white hover:text-black transition-colors"
-                onClick={() => {
-                  router.push("/login");
-                }}
-              >
-                Login
-              </Button>
-            </div>
-          )}
+              </SignInButton>
+            </SignedOut>
+          </div>
         </nav>
 
         <div className="flex flex-col lg:flex-row justify-center items-center py-10 px-6 lg:px-20 overflow-hidden">
           <div className="flex-1 lg:pr-12 mb-12 lg:mb-0">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6 animate-fade-in-up	">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6 animate-fade-in-up">
               Geo-Tagging System
             </h1>
-            <h1 className="text-4xl lg:text-5xl font-bold mb-6 animate-fade-in-up	">
-              for Private Cameras{" "}
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6 animate-fade-in-up">
+              for Private Cameras
             </h1>
             <p className="text-lg text-gray-300 mb-8 animate-fade-in-up animation-delay-200">
               SecureEye is a user-friendly geo-tagging system designed to
@@ -110,16 +118,19 @@ export default function Home() {
             <p className="text-lg mb-8">
               Simple, secure, and efficient geo-tagging.
             </p>
-            <Button
-              variant="outline"
-              size="lg"
-              className="text-white border-white hover:bg-white hover:text-gray-900 transition-colors"
-              onClick={() => {
-                router.push("/camera/form");
-              }}
-            >
-              Add Camera
-            </Button>
+            <SignedIn>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-white border-white hover:bg-white hover:text-gray-900 transition-colors"
+                onClick={() => router.push("/camera/form")}
+              >
+                Add Camera
+              </Button>
+            </SignedIn>
+            <SignedOut>
+              <p className="text-lg text-gray-600">Sign in to add your camera and get started.</p>
+            </SignedOut>
           </div>
           <div className="flex-1">
             <div
@@ -134,6 +145,7 @@ export default function Home() {
             />
           </div>
         </div>
+
         <section className="bg-white text-gray-800 py-20 px-6 lg:px-20">
           <div className="container mx-auto">
             <h2 className="text-3xl lg:text-4xl font-bold mb-12 text-center">
@@ -230,15 +242,25 @@ export default function Home() {
             <p className="text-lg mb-8">
               Enhance your security with SecureEye today.
             </p>
-            <Button
-              size="lg"
-              className="bg-white text-black hover:bg-gray-200 transition-colors"
-              onClick={() => {
-                router.push("/camera/form");
-              }}
-            >
-              Add Camera
-            </Button>
+            <SignedIn>
+              <Button
+                size="lg"
+                className="bg-white text-black hover:bg-gray-200 transition-colors"
+                onClick={() => router.push("/camera/form")}
+              >
+                Add Camera
+              </Button>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton>
+                <Button
+                  size="lg"
+                  className="bg-white text-black hover:bg-gray-200 transition-colors"
+                >
+                  Sign In to Add Camera
+                </Button>
+              </SignInButton>
+            </SignedOut>
           </div>
         </div>
 
@@ -252,12 +274,6 @@ export default function Home() {
           <CardHoverEffectDemo />
         </div>
 
-        <div className="bg-black mt-6 px-6 lg:px-20 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-12">
-            Our Development Team
-          </h2>
-          <AnimatedTooltipPreview />
-        </div>
       </TracingBeam>
 
       <footer className="bg-dark-800 text-white px-6 lg:px-20 flex justify-center items-center py-6">
@@ -268,5 +284,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  );
+  )
 }
