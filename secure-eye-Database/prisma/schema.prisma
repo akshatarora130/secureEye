@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../../secure-eye-Backend/node_modules/.prisma/client"
+  output   = "../../secure-eye-ui/node_modules/.prisma/client"
 }
 
 datasource db {
