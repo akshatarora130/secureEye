@@ -465,7 +465,7 @@ export default function UserDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center text-yellow-300 text-2xl">
                 <AlertCircle className="mr-2 h-6 w-6" />
-                No Cameras Found!
+                No Cameras Found
               </CardTitle>
             </CardHeader>
             <CardContent>
