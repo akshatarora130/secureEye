@@ -87,18 +87,17 @@ export default function UserDashboard() {
   ])
 
   const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null)
+  const [isViewOpen, setIsViewOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const handleUpdateCamera = (updatedCamera: Camera) => {
     setCameras(cameras.map((camera) => (camera.id === updatedCamera.id ? updatedCamera : camera)))
     setSelectedCamera(null)
+    setIsEditOpen(false)
   }
 
   const handleDeleteCamera = (id: number) => {
     setCameras(cameras.filter(camera => camera.id !== id))
-  }
-
-  const handleEditCamera = (camera: Camera) => {
-    setSelectedCamera(camera)
   }
 
   return (
@@ -167,24 +166,111 @@ export default function UserDashboard() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0">
-                <Dialog>
+                <Dialog open={isViewOpen && selectedCamera?.id === camera.id} onOpenChange={(open) => {
+                  setIsViewOpen(open)
+                  if (!open) setSelectedCamera(null)
+                }}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setSelectedCamera(camera)}
+                      onClick={() => {
+                        setSelectedCamera(camera)
+                        setIsViewOpen(true)
+                      }}
                       className="w-full sm:w-auto text-blue-300 border-blue-400 hover:bg-blue-900/50 hover:text-blue-200 transition-all duration-300"
                     >
                       <Eye className="mr-2 h-4 w-4" /> View Details
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-gray-800 text-gray-100 border-gray-700">
+                  <DialogContent className="bg-gray-800 text-gray-100 border-gray-700 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-full rounded-lg z-50">
                     <DialogHeader>
                       <DialogTitle className="text-2xl font-semibold text-blue-300">
                         Camera Details
                       </DialogTitle>
                       <DialogDescription className="text-gray-400">
-                        View and update camera information
+                        View camera information
+                      </DialogDescription>
+                    </DialogHeader>
+                    {selectedCamera && (
+                      <div className="grid gap-6 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Name</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.name}</span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Location</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.location}</span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Type</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.type}</span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Company</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.companyName}</span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Model</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.model}</span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Serial No.</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.serialNo}</span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Range</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.range}</span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Sharing</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.sharing ? 'Yes' : 'No'}</span>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label className="text-right text-gray-400">Verified</Label>
+                          <span className="col-span-3 text-gray-100">{selectedCamera.isVerified ? 'Yes' : 'No'}</span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex justify-end space-x-4 mt-6">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedCamera(null)
+                          setIsViewOpen(false)
+                        }}
+                        className="text-gray-300 border-gray-500 hover:bg-gray-700/50 hover:text-gray-100"
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={isEditOpen && selectedCamera?.id === camera.id} onOpenChange={(open) => {
+                  setIsEditOpen(open)
+                  if (!open) setSelectedCamera(null)
+                }}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCamera(camera)
+                        setIsEditOpen(true)
+                      }}
+                      className="flex-1 sm:flex-initial text-yellow-300 border-yellow-400 hover:bg-yellow-900/50 hover:text-yellow-200 transition-all duration-300"
+                    >
+                      <Edit2 className="mr-2 h-4 w-4" /> Edit
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-gray-800 text-gray-100 border-gray-700 fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 max-w-md rounded-lg z-50">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-semibold text-blue-300">
+                        Edit Camera
+                      </DialogTitle>
+                      <DialogDescription className="text-gray-400">
+                        Update camera information
                       </DialogDescription>
                     </DialogHeader>
                     {selectedCamera && (
@@ -244,6 +330,70 @@ export default function UserDashboard() {
                           </Select>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="companyName" className="text-right text-gray-400">
+                            Company
+                          </Label>
+                          <Input
+                            id="companyName"
+                            value={selectedCamera.companyName}
+                            onChange={(e) =>
+                              setSelectedCamera({
+                                ...selectedCamera,
+                                companyName: e.target.value,
+                              })
+                            }
+                            className="col-span-3 bg-gray-700 text-gray-100 border-gray-600 focus:border-blue-400"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="model" className="text-right text-gray-400">
+                            Model
+                          </Label>
+                          <Input
+                            id="model"
+                            value={selectedCamera.model}
+                            onChange={(e) =>
+                              setSelectedCamera({
+                                ...selectedCamera,
+                                model: e.target.value,
+                              })
+                            }
+                            className="col-span-3 bg-gray-700 text-gray-100 border-gray-600 focus:border-blue-400"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="serialNo" className="text-right text-gray-400">
+                            Serial No.
+                          </Label>
+                          <Input
+                            id="serialNo"
+                            value={selectedCamera.serialNo}
+                            onChange={(e) =>
+                              setSelectedCamera({
+                                ...selectedCamera,
+                                serialNo: e.target.value,
+                              })
+                            }
+                            className="col-span-3 bg-gray-700 text-gray-100 border-gray-600 focus:border-blue-400"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="range" className="text-right text-gray-400">
+                            Range
+                          </Label>
+                          <Input
+                            id="range"
+                            value={selectedCamera.range}
+                            onChange={(e) =>
+                              setSelectedCamera({
+                                ...selectedCamera,
+                                range: e.target.value,
+                              })
+                            }
+                            className="col-span-3 bg-gray-700 text-gray-100 border-gray-600 focus:border-blue-400"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
                           <Label htmlFor="sharing" className="text-right text-gray-400">
                             Sharing
                           </Label>
@@ -258,12 +408,30 @@ export default function UserDashboard() {
                             }
                           />
                         </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="isVerified" className="text-right text-gray-400">
+                            Verified
+                          </Label>
+                          <Switch
+                            id="isVerified"
+                            checked={selectedCamera.isVerified}
+                            onCheckedChange={(checked) =>
+                              setSelectedCamera({
+                                ...selectedCamera,
+                                isVerified: checked,
+                              })
+                            }
+                          />
+                        </div>
                       </div>
                     )}
                     <div className="flex justify-end space-x-4 mt-6">
                       <Button
                         variant="outline"
-                        onClick={() => setSelectedCamera(null)}
+                        onClick={() => {
+                          setSelectedCamera(null)
+                          setIsEditOpen(false)
+                        }}
                         className="text-gray-300 border-gray-500 hover:bg-gray-700/50 hover:text-gray-100"
                       >
                         Cancel
@@ -279,24 +447,14 @@ export default function UserDashboard() {
                     </div>
                   </DialogContent>
                 </Dialog>
-                <div className="flex justify-between w-full sm:w-auto space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => camera && handleEditCamera(camera)}
-                    className="flex-1 sm:flex-initial text-yellow-300 border-yellow-400 hover:bg-yellow-900/50 hover:text-yellow-200 transition-all duration-300"
-                  >
-                    <Edit2 className="mr-2 h-4 w-4" /> Edit
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDeleteCamera(camera.id)}
-                    className="flex-1 sm:flex-initial bg-red-600 hover:bg-red-700 text-white transition-all duration-300"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete
-                  </Button>
-                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeleteCamera(camera.id)}
+                  className="flex-1 sm:flex-initial bg-red-600 hover:bg-red-700 text-white transition-all duration-300"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </Button>
               </CardFooter>
             </Card>
           ))}
